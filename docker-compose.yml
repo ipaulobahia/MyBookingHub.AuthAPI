@@ -1,0 +1,20 @@
+version: '3'
+services:
+  postgres:
+    image: 'postgres'
+    container_name: 'my_booking_hub'
+    environment:
+      POSTGRES_DB: 'MyBookingHub'
+      POSTGRES_USER: 'root'
+      POSTGRES_PASSWORD: '@1708'
+    ports:
+      - '5432:5432'
+  postgresTest:
+    image: 'postgres'
+    container_name: 'my_booking_hub_test'
+    environment:
+      POSTGRES_DB: 'MyBookingHubTeste'
+      POSTGRES_USER: 'root_test'
+      POSTGRES_PASSWORD: '123456789'
+    ports:
+      - '5433:5432'
