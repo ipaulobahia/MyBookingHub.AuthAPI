@@ -4,18 +4,15 @@ import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from 'bcrypt';
 import config from "src/config";
 import { User } from "src/users/entities/user.entity";
-import { IUsersRepository } from "src/users/repositories/users-repository.interface";
 import { UsersService } from "src/users/services/users.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private usersService: UsersService,
-    @Inject('USERS_REPOSITORY')
-    private readonly usersRepository: IUsersRepository,
     @Inject(config.KEY)
-    private configService: ConfigType<typeof config>
+    private configService: ConfigType<typeof config>,
+    private usersService: UsersService,
   ) { }
 
   async clientLogin(cellphone: string) {
@@ -37,7 +34,7 @@ export class AuthService {
   }
 
   async ownerEmployeLogin(email: string, password: string) {
-    const ownerEmployee = await this.usersRepository.findOwnerOrEmployeeByEmailAndGetPassword(email)
+    const ownerEmployee = await this.usersService.findOwnerOrEmployeeByEmailToAuth(email)
 
     if (!ownerEmployee || !ownerEmployee.password) {
       throw new UnauthorizedException("Credenciais inválidas");

@@ -5,7 +5,7 @@ import { OwnerEmployeeLoginDto } from "../dto/owner-employee-login.dto";
 import { PostLoginResponse } from "../dto/response-login.dto";
 import { AuthService } from "../services/auth.service";
 
-@ApiTags('auth')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) { }
