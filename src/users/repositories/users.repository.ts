@@ -3,6 +3,9 @@ import { Role } from "@prisma/client";
 import { PrismaService } from "src/prisma/services/prisma.service";
 import { CreateEmployeeDto } from "../dto/create-employee.dto";
 import { CreateOwnerDto } from "../dto/create-owner.dto";
+import { UpdateClientDto } from "../dto/update-client.dto";
+import { UpdateEmployeeDto } from "../dto/update-employee.dto";
+import { UpdateOwnerDto } from "../dto/update-owner.dto";
 import { AuthUser, User } from "../entities/user.entity";
 import { IUsersRepository } from "./users-repository.interface";
 
@@ -23,6 +26,28 @@ export class UsersRepository implements IUsersRepository {
     if (!user) return null;
 
     return User.fromDatabaseUser(user);
+  }
+
+  async findOneByEmail(userId: string, email: string): Promise<User | null> {
+    return await this.prisma.users.findUnique({
+      where: {
+        email,
+        NOT: {
+          id: userId
+        }
+      },
+    })
+  }
+
+  async findOneByCellphone(userId: string, cellphone: string): Promise<User | null> {
+    return await this.prisma.users.findUnique({
+      where: {
+        cellphone,
+        NOT: {
+          id: userId
+        }
+      },
+    })
   }
 
   async findUsersByRole(role: Role): Promise<User[]> {
@@ -93,8 +118,8 @@ export class UsersRepository implements IUsersRepository {
     return new AuthUser(user);
   }
 
-  async create(createUserDto: CreateOwnerDto | CreateEmployeeDto, role: "OWNER" | "EMPLOYEE"): Promise<void> {
-    const { cellphone, email, name, password } = createUserDto
+  async createOwner(createUserDto: CreateOwnerDto): Promise<void> {
+    const { cellphone, email, name, password, role } = createUserDto
 
     await this.prisma.users.create({
       data: {
@@ -107,10 +132,68 @@ export class UsersRepository implements IUsersRepository {
     });
   }
 
+  async createEmployee(createUserDto: CreateEmployeeDto): Promise<void> {
+    const { cellphone, email, name, password, role, employeeBusinessId } = createUserDto
+
+    await this.prisma.users.create({
+      data: {
+        cellphone,
+        name,
+        email,
+        password,
+        role,
+      },
+    });
+  }
+
+  async updateOwner(ownerId: string, updateOwnerDto: UpdateOwnerDto): Promise<void> {
+    const { name, cellphone, avatar, email } = updateOwnerDto
+
+    await this.prisma.users.update({
+      where: { id: ownerId },
+      data: {
+        name,
+        cellphone
+      }
+    })
+  }
+
+  async updateEmployee(employeeId: string, updateEmployeeDto: UpdateEmployeeDto): Promise<void> {
+    const { name, cellphone, avatar, email } = updateEmployeeDto
+
+    await this.prisma.users.update({
+      where: { id: employeeId },
+      data: {
+        name,
+        cellphone,
+        avatar,
+        email
+      }
+    })
+  }
+
+  async updateClient(clientId: string, updateClientDto: UpdateClientDto): Promise<void> {
+    const { name, cellphone } = updateClientDto
+
+    await this.prisma.users.update({
+      where: { id: clientId },
+      data: {
+        name,
+        cellphone
+      }
+    })
+  }
+
   async updateRefreshToken(userId: string, refreshToken: string): Promise<void> {
     await this.prisma.users.update({
       where: { id: userId },
       data: { refreshToken }
     });
+  }
+
+  async delete(userId: string): Promise<void> {
+    await this.prisma.users.delete({
+      where: { id: userId }
+    })
   }
 }

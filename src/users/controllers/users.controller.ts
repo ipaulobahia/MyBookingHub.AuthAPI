@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Role } from "@prisma/client";
 import { Roles } from "src/auth/decorators/roles.decorator";
@@ -6,28 +6,16 @@ import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { RolesGuard } from "src/auth/guards/roles.guard";
 import { CreateEmployeeDto } from "../dto/create-employee.dto";
 import { CreateOwnerDto } from "../dto/create-owner.dto";
+import { UpdateClientDto } from "../dto/update-client.dto";
+import { UpdateEmployeeDto } from "../dto/update-employee.dto";
+import { UpdateOwnerDto } from "../dto/update-owner.dto";
 import { UsersService } from "../services/users.service";
 
-@ApiTags('users')
+@ApiTags('Users')
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
-
-  @ApiOperation({ summary: 'Crie um usuário com função de proprietário' })
-  @ApiResponse({ status: 201 })
-  @Post("owner")
-  createOwner(@Body() createOwnerDto: CreateOwnerDto) {
-    return this.usersService.create(createOwnerDto, "OWNER")
-  }
-
-  @ApiOperation({ summary: 'Crie um usuário com função de funcionário' })
-  @ApiResponse({ status: 201 })
-  @Roles(Role.OWNER)
-  @Post("employee")
-  createEmployee(@Body() createEmployeeDto: CreateEmployeeDto) {
-    return this.usersService.create(createEmployeeDto, "EMPLOYEE")
-  }
 
   @ApiOperation({ summary: 'Busque todos os usuários' })
   @ApiResponse({ status: 200, isArray: true })
@@ -64,7 +52,7 @@ export class UsersController {
     return this.usersService.findUsersByRole("EMPLOYEE")
   }
 
-  @ApiOperation({ summary: 'Busque um cliente pelo seu Id' })
+  @ApiOperation({ summary: 'Busque um cliente' })
   @ApiResponse({ status: 200, isArray: true })
   @ApiBearerAuth('access-token')
   @Roles(Role.OWNER)
@@ -89,5 +77,56 @@ export class UsersController {
   @Get('clients/:businessId')
   findClientsByBusinessId(@Param('businessId') businessId: string) {
     return this.usersService.findByBusinessAndRole(businessId, "CLIENT")
+  }
+
+  @ApiOperation({ summary: 'Crie um usuário com função de proprietário' })
+  @ApiResponse({ status: 201 })
+  @ApiBearerAuth('access-token')
+  @Post("owner")
+  createOwner(@Body() createOwnerDto: CreateOwnerDto) {
+    return this.usersService.createOwner(createOwnerDto)
+  }
+
+  @ApiOperation({ summary: 'Crie um usuário com função de funcionário' })
+  @ApiResponse({ status: 201 })
+  @ApiBearerAuth('access-token')
+  @Roles(Role.OWNER)
+  @Post("employee")
+  createEmployee(@Body() createEmployeeDto: CreateEmployeeDto) {
+    return this.usersService.createEmployee(createEmployeeDto)
+  }
+
+  @ApiOperation({ summary: 'Edita um proprietário' })
+  @ApiResponse({ status: 200 })
+  @ApiBearerAuth('access-token')
+  @Roles(Role.OWNER)
+  @Put('owner/:id')
+  updateOwner(@Param('id') ownerId: string, @Body() updateOwnerDto: UpdateOwnerDto) {
+    return this.usersService.updateOwner(ownerId, updateOwnerDto)
+  }
+
+  @ApiOperation({ summary: 'Edita um funcionário' })
+  @ApiResponse({ status: 200 })
+  @ApiBearerAuth('access-token')
+  @Roles(Role.OWNER, Role.EMPLOYEE)
+  @Put('employee/:id')
+  updateEmployee(@Param('id') employeeId: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
+    return this.usersService.updateEmployee(employeeId, updateEmployeeDto)
+  }
+
+  @ApiOperation({ summary: 'Edita um cliente' })
+  @ApiResponse({ status: 200 })
+  @ApiBearerAuth('access-token')
+  @Put('client/:id')
+  updateClient(@Param('id') clientId: string, @Body() updateClientDto: UpdateClientDto) {
+    return this.usersService.updateClient(clientId, updateClientDto)
+  }
+
+  @ApiOperation({ summary: 'Deleta um usuário' })
+  @ApiResponse({ status: 200 })
+  @ApiBearerAuth('access-token')
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.usersService.delete(id)
   }
 }
