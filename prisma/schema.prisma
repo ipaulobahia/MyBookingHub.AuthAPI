@@ -42,6 +42,9 @@ model Business {
 
   type BusinessType
 
+  isActive  Boolean   @default(true)
+  deletedAt DateTime? @updatedAt @map("deleted_at")
+
   owner   Users  @relation("OwnerBusinesses", fields: [ownerId], references: [id])
   ownerId String
 
