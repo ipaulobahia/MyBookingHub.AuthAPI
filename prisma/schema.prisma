@@ -21,10 +21,44 @@ model Users {
   refreshToken String? @map("refresh_token")
 
   role Role
+
+  businessesOwned Business[] @relation("OwnerBusinesses")
+
+  employeeBusiness   Business? @relation("BusinessEmployees", fields: [employeeBusinessId], references: [id])
+  employeeBusinessId String?
+
+  clientBusinesses Business[] @relation("BusinessClients")
+}
+
+model Business {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name      String
+  cnpj      String @unique
+  cellphone String
+  address   String
+
+  type BusinessType
+
+  owner   Users  @relation("OwnerBusinesses", fields: [ownerId], references: [id])
+  ownerId String
+
+  employees Users[] @relation("BusinessEmployees")
+
+  clients Users[] @relation("BusinessClients")
 }
 
 enum Role {
   OWNER
   EMPLOYEE
   CLIENT
+}
+
+enum BusinessType {
+  BARBERSHOP
+  BEAUTY_SALON
+  AESTHETICS_CENTER
+  OTHERS
 }
