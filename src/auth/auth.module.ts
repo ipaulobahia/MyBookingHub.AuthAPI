@@ -1,17 +1,20 @@
-import { Module } from "@nestjs/common";
-import { ConfigType } from "@nestjs/config";
+import { Module } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from "@nestjs/passport";
-import { UsersService } from "src/users/services/users.services";
-import { UsersModule } from "src/users/users.module";
-import config from "../config";
-import { AuthController } from "./controllers/auth.controller";
-import { AuthService } from "./services/auth.service";
+import { PassportModule } from '@nestjs/passport';
+import { UsersRepository } from 'src/users/repositories/users.repository';
+import { UsersService } from 'src/users/services/users.service';
+import config from '../config';
+import { UsersModule } from '../users/users.module';
+import { AuthController } from './controllers/auth.controller';
+import { AuthService } from './services/auth.service';
+import { JwtRefreshTokenStrategy } from './strategies/jwt-refresh.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
-    PassportModule,
     UsersModule,
+    PassportModule,
     JwtModule.registerAsync({
       inject: [config.KEY],
       useFactory: (configService: ConfigType<typeof config>) => {
@@ -25,6 +28,15 @@ import { AuthService } from "./services/auth.service";
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UsersService],
+  providers: [
+    UsersService,
+    AuthService,
+    JwtStrategy,
+    JwtRefreshTokenStrategy,
+    {
+      provide: 'USERS_REPOSITORY',
+      useClass: UsersRepository,
+    },
+  ],
 })
 export class AuthModule { }

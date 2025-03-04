@@ -3,13 +3,7 @@ import { ApiBody, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { ClientLoginDto } from "../dto/client-login.dto";
 import { OwnerEmployeeLoginDto } from "../dto/owner-employee-login.dto";
 import { PostLoginResponse } from "../dto/response-login.dto";
-import { PayloadClientToken } from "../models/client-token.model";
 import { AuthService } from "../services/auth.service";
-
-type AuthorizedClientRequest = Express.Request & {
-  headers: { authorization: string };
-  user: PayloadClientToken;
-};
 
 @ApiTags('auth')
 @Controller('auth')

@@ -1,16 +1,19 @@
 import { BadRequestException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigType } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import { Users } from "@prisma/client";
 import * as bcrypt from 'bcrypt';
 import config from "src/config";
-import { UsersService } from "src/users/services/users.services";
+import { User } from "src/users/entities/user.entity";
+import { IUsersRepository } from "src/users/repositories/users-repository.interface";
+import { UsersService } from "src/users/services/users.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private usersService: UsersService,
+    @Inject('USERS_REPOSITORY')
+    private readonly usersRepository: IUsersRepository,
     @Inject(config.KEY)
     private configService: ConfigType<typeof config>
   ) { }
@@ -34,7 +37,7 @@ export class AuthService {
   }
 
   async ownerEmployeLogin(email: string, password: string) {
-    const ownerEmployee = await this.usersService.findOwnerOrEmployeeByEmailAndGetPassword(email)
+    const ownerEmployee = await this.usersRepository.findOwnerOrEmployeeByEmailAndGetPassword(email)
 
     if (!ownerEmployee || !ownerEmployee.password) {
       throw new UnauthorizedException("Credenciais inválidas");
@@ -57,16 +60,16 @@ export class AuthService {
     };
   }
 
-  generateTokenPayload(user: Users) {
+  generateTokenPayload(user: User) {
     return { sub: user.id, role: user.role, iat: Math.floor(Date.now() / 1000) };
   }
 
-  generateAccessToken(user: Users) {
+  generateAccessToken(user: User) {
     const payload = this.generateTokenPayload(user);
     return this.jwtService.sign(payload);
   }
 
-  generateRefreshToken(user: Users) {
+  generateRefreshToken(user: User) {
     const payload = this.generateTokenPayload(user);
     return this.jwtService.sign(payload, {
       secret: this.configService.jwt.jwtRefreshSecret,
