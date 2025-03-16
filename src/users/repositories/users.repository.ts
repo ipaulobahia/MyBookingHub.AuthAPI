@@ -111,7 +111,7 @@ export class UsersRepository implements IUsersRepository {
 
   async findOwnerOrEmployeeByEmailAndGetPassword(email: string): Promise<User | null> {
     const user = await this.prisma.users.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (!user) return null;
@@ -119,7 +119,7 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async createOwner(createUserDto: CreateOwnerDto): Promise<void> {
-    const { cellphone, email, name, password, role } = createUserDto
+    const { cellphone, email, name, password } = createUserDto
 
     await this.prisma.users.create({
       data: {
@@ -127,7 +127,7 @@ export class UsersRepository implements IUsersRepository {
         name,
         email,
         password,
-        role,
+        role: 'OWNER',
       },
     });
   }

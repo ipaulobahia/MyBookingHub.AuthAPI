@@ -51,8 +51,7 @@ export class UsersService {
       cellphone,
       email,
       name,
-      password: hashedPassword,
-      role: "OWNER"
+      password: hashedPassword
     })
   }
 
