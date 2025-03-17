@@ -21,9 +21,9 @@ export class BusinessController {
     return this.businessService.findAll()
   }
 
-  @ApiOperation({ summary: 'Busque um  estabelecimento pelo seu id' })
+  @ApiOperation({ summary: 'Busque um estabelecimento pelo seu id' })
   @ApiResponse({ status: 200, isArray: true })
-  @ApiBearerAuth('access-token')
+  @Public()
   @Get(':id')
   findOne(@Param('id') userId: string) {
     return this.businessService.findOne(userId)

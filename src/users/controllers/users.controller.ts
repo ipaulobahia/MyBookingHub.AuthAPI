@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Role } from "@prisma/client";
+import { Public } from "src/auth/decorators/public.decorator";
 import { Roles } from "src/auth/decorators/roles.decorator";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { RolesGuard } from "src/auth/guards/roles.guard";
@@ -28,8 +29,8 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Busque um usuário pelo seu Id' })
   @ApiResponse({ status: 200 })
-  @ApiBearerAuth('access-token')
-  @Get('/byId/:id')
+  @Public()
+  @Get(':id')
   findOne(@Param('id') userId: string) {
     return this.usersService.findOne(userId)
   }
